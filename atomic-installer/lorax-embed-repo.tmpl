@@ -4,8 +4,8 @@
 ## Note that we pull with depth=0 to only get *one* commit into the
 ## ISO, because we obviously don't want the full history.
 
-<%page args="root, ostree_osname, ostree_repo, ostree_ref"/>
-mkdir ostree
+<%page args="root, ostree_repo, ostree_osname, ostree_ref"/>
+runcmd mkdir ${root}/ostree
 runcmd ostree --repo=${root}/ostree/repo init --mode=bare
-runcmd ostree --repo=${root}/ostree/repo remote add ostree-mirror --set=gpg-verify=false ${ostree_repo}
-runcmd ostree --repo=${root}/ostree/repo pull --mirror ostree-mirror ${ostree_ref}
+runcmd ostree --repo=${root}/ostree/repo remote add ${ostree_osname} --set=gpg-verify=false ${ostree_repo}
+runcmd ostree --repo=${root}/ostree/repo pull --mirror ${ostree_osname} ${ostree_ref}
