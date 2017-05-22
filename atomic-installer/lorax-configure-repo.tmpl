@@ -4,8 +4,8 @@
 ##     but the package enables itself by default
 ##  3) Work around https://bugzilla.redhat.com/show_bug.cgi?id=1193590
 
-<%page args="ostree_repo, ostree_osname, ostree_ref"/>
-append usr/share/anaconda/interactive-defaults.ks "ostreesetup --nogpg --osname=${ostree_osname} --remote=${ostree_osname} --url=file:///ostree/repo --ref=${ostree_ref}\n"
+<%page args="ostree_osname, ostree_repo, ostree_install_ref, ostree_update_ref"/>
+append usr/share/anaconda/interactive-defaults.ks "ostreesetup --nogpg --osname=${ostree_osname} --remote=${ostree_osname} --url=file:///ostree/repo --ref=${ostree_update_ref}\n"
 append usr/share/anaconda/interactive-defaults.ks "services --disabled cloud-init,cloud-config,cloud-final,cloud-init-local\n"
 append usr/share/anaconda/interactive-defaults.ks "%post --erroronfail\nrm -f /etc/ostree/remotes.d/${ostree_osname}.conf\nostree remote add --set=gpg-verify=false ${ostree_osname} '${ostree_repo}'\ncp /etc/skel/.bash* /root\n%end\n"
 
