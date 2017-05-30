@@ -7,14 +7,15 @@
 ## Args:
 ##  - root               - the root directory of the iso tree
 ##  - ostree_osname      - the name of the os/name of remote
-##  - ostree_repo        - the url of the remote
+##  - ostree_install_repo- the url of the remote during ISO creation
+##  - ostree_update_repo - the url of the remote for updates of an installed system
 ##  - ostree_install_ref - the ref to use when creating the ISO  
 ##  - ostree_update_ref  - the ref to use for updates of an installed system
 
-<%page args="root, ostree_osname, ostree_repo, ostree_install_ref, ostree_update_ref"/>
+<%page args="root, ostree_osname, ostree_install_repo, ostree_update_repo, ostree_install_ref, ostree_update_ref"/>
 runcmd mkdir ${root}/ostree
 runcmd ostree --repo=${root}/ostree/repo init --mode=bare
-runcmd ostree --repo=${root}/ostree/repo remote add ${ostree_osname} --set=gpg-verify=false ${ostree_repo}
+runcmd ostree --repo=${root}/ostree/repo remote add ${ostree_osname} --set=gpg-verify=false ${ostree_install_repo}
 runcmd ostree --repo=${root}/ostree/repo pull --mirror ${ostree_osname} ${ostree_install_ref}
 runcmd bash -c 'if [ "${ostree_install_ref}" != "${ostree_update_ref}" ]; then ostree --repo=${root}/ostree/repo refs ${ostree_install_ref} --create ${ostree_update_ref}; fi'
 runcmd ostree --repo=${root}/ostree/repo summary -u

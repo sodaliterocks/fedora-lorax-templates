@@ -6,12 +6,13 @@
 
 ## Args:
 ##  - ostree_osname      - the name of the os/name of remote
-##  - ostree_repo        - the url of the remote
+##  - ostree_install_repo- the url of the remote during ISO creation
+##  - ostree_update_repo - the url of the remote for updates of an installed system
 ##  - ostree_install_ref - the ref to use when creating the ISO  
 ##  - ostree_update_ref  - the ref to use for updates of an installed system
 
-<%page args="ostree_osname, ostree_repo, ostree_install_ref, ostree_update_ref"/>
+<%page args="ostree_osname, ostree_install_repo, ostree_update_repo, ostree_install_ref, ostree_update_ref"/>
 append usr/share/anaconda/interactive-defaults.ks "ostreesetup --nogpg --osname=${ostree_osname} --remote=${ostree_osname} --url=file:///ostree/repo --ref=${ostree_update_ref}\n"
 append usr/share/anaconda/interactive-defaults.ks "services --disabled cloud-init,cloud-config,cloud-final,cloud-init-local\n"
-append usr/share/anaconda/interactive-defaults.ks "%post --erroronfail\nrm -f /etc/ostree/remotes.d/${ostree_osname}.conf\nostree remote add --set=gpg-verify=false ${ostree_osname} '${ostree_repo}'\ncp /etc/skel/.bash* /root\n%end\n"
+append usr/share/anaconda/interactive-defaults.ks "%post --erroronfail\nrm -f /etc/ostree/remotes.d/${ostree_osname}.conf\nostree remote add --set=gpg-verify=false ${ostree_osname} '${ostree_update_repo}'\ncp /etc/skel/.bash* /root\n%end\n"
 
