@@ -12,7 +12,12 @@
 ##  - ostree_update_ref  - the ref to use for updates of an installed system
 
 <%page args="ostree_osname, ostree_install_repo, ostree_update_repo, ostree_install_ref, ostree_update_ref"/>
-append usr/share/anaconda/interactive-defaults.ks "ostreesetup --nogpg --osname=${ostree_osname} --remote=${ostree_osname} --url=file:///ostree/repo --ref=${ostree_update_ref}\n"
-append usr/share/anaconda/interactive-defaults.ks "services --disabled cloud-init,cloud-config,cloud-final,cloud-init-local\n"
-append usr/share/anaconda/interactive-defaults.ks "%post --erroronfail\nrm -f /etc/ostree/remotes.d/${ostree_osname}.conf\nostree remote add --set=gpg-verify=false ${ostree_osname} '${ostree_update_repo}'\ncp /etc/skel/.bash* /root\n%end\n"
+append usr/share/anaconda/interactive-defaults.ks "ostreesetup --nogpg --osname=${ostree_osname} --remote=${ostree_osname} --url=file:///ostree/repo --ref=${ostree_update_ref}"
+append usr/share/anaconda/interactive-defaults.ks "services --disabled cloud-init,cloud-config,cloud-final,cloud-init-local"
+
+append usr/share/anaconda/interactive-defaults.ks "%post --erroronfail"
+append usr/share/anaconda/interactive-defaults.ks "rm -f /etc/ostree/remotes.d/${ostree_osname}.conf"
+append usr/share/anaconda/interactive-defaults.ks "ostree remote add --set=gpg-verify=false ${ostree_osname} '${ostree_update_repo}'"
+append usr/share/anaconda/interactive-defaults.ks "cp /etc/skel/.bash* /root"
+append usr/share/anaconda/interactive-defaults.ks "%end"
 
