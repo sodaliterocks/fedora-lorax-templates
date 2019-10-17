@@ -23,7 +23,7 @@ flatpak_repo=joinpaths(flatpak_dir, "repo")
 %>
 
 runcmd flatpak config --user --set languages "*"
-runcmd flatpak remote-add --user ${flatpak_remote_name} oci+https://registry.fedoraproject.org
+runcmd flatpak remote-add --user ${flatpak_remote_name} ${flatpak_remote_url}
 runcmd flatpak install -y --user ${flatpak_remote_name} ${flatpak_remote_refs}
 runcmd mkdir -p ${root}/flatpak
 runcmd ostree init --repo=${dest_repo} --mode=archive-z2
