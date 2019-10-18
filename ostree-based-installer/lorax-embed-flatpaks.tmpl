@@ -10,6 +10,7 @@
 <%
 import os
 import re
+import tempfile
 from pylorax.executils import runcmd_output, setenv
 from pylorax.sysutils import joinpaths
 
@@ -20,6 +21,9 @@ refs=re.split(r"\s+", flatpak_remote_refs)
 flatpak_dir=joinpaths(os.path.dirname(root), "flatpak")
 setenv("FLATPAK_USER_DIR", flatpak_dir)
 flatpak_repo=joinpaths(flatpak_dir, "repo")
+# suppress executing triggers by using an empty directory
+triggers_dir = tempfile.mkdtemp(prefix='flatpak-triggers-')
+setenv("FLATPAK_TRIGGERSDIR", triggers_dir)
 %>
 
 runcmd flatpak config --user --set languages "*"
