@@ -29,7 +29,10 @@ setenv("FLATPAK_TRIGGERSDIR", triggers_dir)
 runcmd flatpak config --user --set languages "*"
 runcmd flatpak remote-add --user ${flatpak_remote_name} ${flatpak_remote_url}
 %if len(refs) > 0:
-    runcmd flatpak install -y --user ${flatpak_remote_name} ${flatpak_remote_refs}
+    # We have to run a DBus session here, because Flatpak wants to talk to
+    # flatpak-oci-authenticator for OCI remotes - even ones that don't require
+    # authentication
+    runcmd dbus-run-session flatpak install -y --user ${flatpak_remote_name} ${flatpak_remote_refs}
 %endif
 runcmd mkdir -p ${root}/flatpak
 runcmd ostree init --repo=${dest_repo} --mode=archive-z2
