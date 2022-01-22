@@ -10,6 +10,7 @@
 ##  - flatpak_remote_refs_2 - refs to fetch from the second remote (whitespace separated)
 
 <%page args="root, flatpak_remote_name_1, flatpak_remote_url_1, flatpak_remote_refs_1, flatpak_remote_name_2, flatpak_remote_url_2, flatpak_remote_refs_2"/>
+
 <%
 import os
 import re
@@ -31,21 +32,53 @@ setenv("FLATPAK_TRIGGERSDIR", triggers_dir)
 
 runcmd flatpak config --user --set languages "*"
 runcmd flatpak remote-add --user ${flatpak_remote_name_1} ${flatpak_remote_url_1}
-runcmd flatpak remote-add --user ${flatpak_remote_name_2} ${flatpak_remote_url_2}
 %if len(refs) > 0:
     # We have to run a DBus session here, because Flatpak wants to talk to
     # flatpak-oci-authenticator for OCI remotes - even ones that don't require
     # authentication
     runcmd dbus-run-session flatpak install -y --user ${flatpak_remote_name_1} ${flatpak_remote_refs_1}
-    runcmd dbus-run-session flatpak install -y --user ${flatpak_remote_name_2} ${flatpak_remote_refs_2}
 %endif
 runcmd mkdir -p ${root}/flatpak
 runcmd ostree init --repo=${dest_repo} --mode=archive-z2
 %for ref in refs:
     runcmd sh -c "ostree --repo=${dest_repo} pull-local ${flatpak_repo} $(ostree --repo=${flatpak_repo} rev-parse ${flatpak_remote_name_1}/${ref})"
-    runcmd sh -c "ostree --repo=${dest_repo} pull-local ${flatpak_repo} $(ostree --repo=${flatpak_repo} rev-parse ${flatpak_remote_name_2}/${ref})"
     runcmd sh -c "mkdir -p $(dirname ${dest_repo}/refs/heads/${ref})"
     runcmd sh -c "ostree --repo=${flatpak_repo} rev-parse ${flatpak_remote_name_1}/${ref} > ${dest_repo}/refs/heads/${ref}"
+%endfor
+runcmd flatpak build-update-repo ${dest_repo}
+
+<%
+import os
+import re
+import tempfile
+from pylorax.executils import runcmd_output, setenv
+from pylorax.sysutils import joinpaths
+
+dest_repo=joinpaths(root, "flatpak/repo")
+refs=re.split(r"\s+", flatpak_remote_refs_2)
+
+# the temporary Flatpak directory is a sibling of the install tree
+flatpak_dir=joinpaths(os.path.dirname(root), "flatpak")
+setenv("FLATPAK_USER_DIR", flatpak_dir)
+flatpak_repo=joinpaths(flatpak_dir, "repo")
+# suppress executing triggers by using an empty directory
+triggers_dir = tempfile.mkdtemp(prefix='flatpak-triggers-')
+setenv("FLATPAK_TRIGGERSDIR", triggers_dir)
+%>
+
+runcmd flatpak config --user --set languages "*"
+runcmd flatpak remote-add --user ${flatpak_remote_name_2} ${flatpak_remote_url_2}
+%if len(refs) > 0:
+    # We have to run a DBus session here, because Flatpak wants to talk to
+    # flatpak-oci-authenticator for OCI remotes - even ones that don't require
+    # authentication
+    runcmd dbus-run-session flatpak install -y --user ${flatpak_remote_name_2} ${flatpak_remote_refs_2}
+%endif
+runcmd mkdir -p ${root}/flatpak
+runcmd ostree init --repo=${dest_repo} --mode=archive-z2
+%for ref in refs:
+    runcmd sh -c "ostree --repo=${dest_repo} pull-local ${flatpak_repo} $(ostree --repo=${flatpak_repo} rev-parse ${flatpak_remote_name_2}/${ref})"
+    runcmd sh -c "mkdir -p $(dirname ${dest_repo}/refs/heads/${ref})"
     runcmd sh -c "ostree --repo=${flatpak_repo} rev-parse ${flatpak_remote_name_2}/${ref} > ${dest_repo}/refs/heads/${ref}"
 %endfor
 runcmd flatpak build-update-repo ${dest_repo}
